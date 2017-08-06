@@ -25,8 +25,6 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def set_points(x, y, symbol, amount):
-    print('x: {0}'.format(x))
-    print('y: {0}'.format(y))
     trace1 = go.Scatter(
         x=[x],
         y=[y],
@@ -43,7 +41,7 @@ def set_points(x, y, symbol, amount):
 
     # Send fig to Plotly, initialize streaming plot, open new tab
     py.plot(fig, fileopt='extend', filename='python-streaming', auto_open=False)
-    print(bcolors.FAIL + 'Sent to plotly ({0}, {1})\n'.format(symbol, amount) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
+    print(bcolors.FAIL + 'Sent to plotly ({0}, {1})'.format(symbol, amount) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
 
 if len(sys.argv) > 1 and sys.argv[1] == 'setup':
     print('Entering plotly setup...')
