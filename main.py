@@ -3,6 +3,9 @@ import json
 import configparser
 import sys
 
+from customPlotly import s
+from datetime import datetime
+
 from web3 import Web3, KeepAliveRPCProvider, IPCProvider, HTTPProvider
 
 class bcolors:
@@ -21,12 +24,13 @@ Config.read("config.ini")
 web3 = Web3(HTTPProvider(Config['Setup']['NodeURL']))
 
 def new_block_callback(block_hash):
-    print(bcolors.OKGREEN + "New Block: {0}".format(block_hash) + bcolors.ENDC)
     b = web3.eth.getBlock(block_hash)
+    print(bcolors.OKGREEN + "New Block: {0} | Number: {1}".format(block_hash, b['number']) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
     for t in range(0, len(b['transactions'])):
         r = web3.eth.getTransactionReceipt(b['transactions'][t])
         # first address(es) are token contracts
         # second address is hex-sha3 of ERC20 'Transfer' event
+        # print(r['transactionHash'])
         if (r['from'] in Config._sections['Exchanges'] or r['to'] in Config._sections['Exchanges']) and len(r['logs']) > 0 and r['logs'][0]['topics'][0] == Config['Setup']['TransferEvent']:
             if r['from'] in Config._sections['Exchanges']:
                 action = 'from'
@@ -46,6 +50,23 @@ def new_block_callback(block_hash):
             keepIndex = len(amount) - decimals # adjust for decimals defined in token SC
             amount = amount[0:keepIndex]+'.'+amount[keepIndex:-1]
             print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + amount + bcolors.ENDC + '\n')
+
+            # send data to Plotly
+            if n['symbol'] == 'OMG':
+                # Current time on x-axis, random numbers on y-axis
+                x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                y = amount
+
+                # Send data to your plot
+                s.write(dict(x=x, y=y))
+                print(bcolors.FAIL + 'Sent to plotly\n' + bcolors.ENDC)
+
+                #     Write numbers to stream to append current data on plot,
+                #     write lists to overwrite existing data on plot
+
+                # Close the stream when done plotting
+                # s.close()
+
         else:
             continue
             # print('No etherdelta', r['from'], r['to'])
