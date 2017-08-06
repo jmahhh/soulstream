@@ -12,3 +12,4 @@ pyvenv.cfg
 pip-selfcheck.json
 [Ss]hare
 .ipynb_checkpoints
+__pycache__
