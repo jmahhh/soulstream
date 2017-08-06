@@ -1,9 +1,10 @@
-import numpy as np
 import plotly.plotly as py
 import plotly.tools as tls
 import plotly.graph_objs as go
 import sys
 import time
+
+from datetime import datetime
 
 tls.set_credentials_file(username='jmahhh', api_key='5m6VBRHj52c314Qy8hTc', stream_ids=['j3mkjkmnp9'])
 tls.set_config_file(world_readable=True, sharing='public')
@@ -42,7 +43,7 @@ def set_points(x, y, symbol, amount):
 
     # Send fig to Plotly, initialize streaming plot, open new tab
     py.plot(fig, fileopt='extend', filename='python-streaming', auto_open=False)
-    print(bcolors.FAIL + 'Sent to plotly ({0}, {1})\n'.format(symbol, amount) + bcolors.ENDC)
+    print(bcolors.FAIL + 'Sent to plotly ({0}, {1})\n'.format(symbol, amount) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
 
 if len(sys.argv) > 1 and sys.argv[1] == 'setup':
     print('Entering plotly setup...')
