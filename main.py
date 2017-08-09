@@ -96,9 +96,13 @@ def new_block_callback(block_hash):
         else:
             print('no r? {0}'.format(r))
 
-block_filter = web3.eth.filter('latest')
-print('Waiting for blocks...')
-block_filter.watch(new_block_callback)
+try:
+    block_filter = web3.eth.filter('latest')
+    print('Waiting for blocks...')
+    block_filter.watch(new_block_callback)
+except Exception as e:
+    print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
+    pass
 
 while True:
     pass
