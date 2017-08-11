@@ -1,13 +1,15 @@
 import plotly.plotly as py
 import plotly.tools as tls
 import plotly.graph_objs as go
+import configparser
 import sys
 import time
+import ast
 
 from datetime import datetime
 
 tls.set_credentials_file(username='jmahhh', api_key='5m6VBRHj52c314Qy8hTc', stream_ids=['j3mkjkmnp9'])
-tls.set_config_file(world_readable=True, sharing='public')
+tls.set_config_file(world_readable=False, sharing='private')
 
 # stream_ids = tls.get_credentials_file()['stream_ids']
 
@@ -24,43 +26,70 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def set_points(x, y, symbol, amount):
-    trace1 = go.Scatter(
-        x=[x],
-        y=[y],
-        mode='lines+markers',
-    )
+def organize_traces(tlist):
+    traceArray = []
+    for symbol in tlist:
+        trace = go.Scatter(
+            x=[],
+            y=[],
+            name = symbol,
+            mode='lines+markers+text',
+        )
+        traceArray.append(trace)
 
-    data = go.Data([trace1])
+    return traceArray
+
+def set_points(x, y, symbol, amount, action):
+    traceArray = []
+    for token in tlist:
+        if token == symbol:
+            trace = go.Scatter(
+                x=[x],
+                y=[y],
+                name = symbol,
+                mode='lines+markers+text',
+            )
+            traceArray.append(trace)
+        else:
+            trace = go.Scatter(
+                x=[],
+                y=[],
+                name = symbol,
+                mode='lines+markers+text',
+            )
+            traceArray.append(trace)
 
     # Add title to layout object
-    layout = go.Layout(title='Time Series')
+    layout = go.Layout(title='Token Transfers')
 
     # Make a figure object
-    fig = go.Figure(data=data, layout=layout)
+    fig = go.Figure(data=traceArray, layout=layout)
 
     # Send fig to Plotly, initialize streaming plot, open new tab
-    py.plot(fig, fileopt='extend', filename='python-streaming', auto_open=False)
+    if action == 'to':
+        py.plot(fig, fileopt='extend', filename='tokens_1_to', auto_open=False)
+    elif action == 'from':
+        py.plot(fig, fileopt='extend', filename='tokens_1_from', auto_open=False)
     print(bcolors.FAIL + 'Sent to plotly ({0}, {1})'.format(symbol, amount) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
 
-if len(sys.argv) > 1 and sys.argv[1] == 'setup':
-    print('Entering plotly setup...')
-    trace1 = go.Scatter(
-        x=[],
-        y=[],
-        mode='lines+markers',
-    )
+Config = configparser.ConfigParser()
+Config.read("config.ini")
 
-    data = go.Data([trace1])
+tlist = Config.get('Tokens','List')
+tlist = ast.literal_eval(tlist)
+
+if len(sys.argv) > 1 and sys.argv[1] == 'setup':
+    data = organize_traces(tlist)
 
     # Add title to layout object
-    layout = go.Layout(title='Time Series')
+    layout = go.Layout(title='Token transfers')
 
     # Make a figure object
     fig = go.Figure(data=data, layout=layout)
 
     # Send fig to Plotly, initialize streaming plot, open new tab
-    py.plot(fig, fileopt='extend', filename='python-streaming')
+    py.plot(fig, fileopt='extend', filename='tokens_1_to')
+    py.plot(fig, fileopt='extend', filename='tokens_1_from')
     # Make instance of stream id object
     # stream_1 = go.Stream(
     #     token=stream_id,  # link stream id to 'token' key

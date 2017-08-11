@@ -3,6 +3,7 @@ import json
 import configparser
 import sys
 import signal
+import ast
 
 # should probably replace with threading
 from multiprocessing import Process, Queue
@@ -26,6 +27,9 @@ Config.read("config.ini")
 
 web3 = Web3(HTTPProvider(Config['Setup']['NodeURL']))
 
+tlist = Config.get('Tokens','List')
+tlist = ast.literal_eval(tlist)
+
 # close plotly stream when SIGINT received
 def signal_handler(signal, frame):
     # s.close()
@@ -41,7 +45,7 @@ def reader(queue):
         if (msg == 'DONE'):
             break
         # s.write(dict(x=msg[0], y=msg[1]))
-        set_points(msg[0], msg[1], msg[2], msg[3])
+        set_points(msg[0], msg[1], msg[2], msg[3], msg[4])
 
 def writer(array, queue):
     ## Write to the queue
@@ -58,9 +62,11 @@ def new_block_callback(block_hash):
         # print(r['transactionHash'])
         if r:
             if (r['from'] in Config._sections['Exchanges'] or r['to'] in Config._sections['Exchanges']) and len(r['logs']) > 0 and r['logs'][0]['topics'][0] == Config['Setup']['TransferEvent']:
-                if r['from'] in Config._sections['Exchanges']:
+                action = ''
+                edit = r['to'].split('0x')[1]
+                if edit in r['logs'][0]['topics'][1]:
                     action = 'from'
-                else:
+                elif edit in r['logs'][0]['topics'][2]:
                     action = 'to'
                 for ex in Config.items('Exchanges'):
                     if ex[0] == r['from'] or ex[0] == r['to']:
@@ -68,27 +74,33 @@ def new_block_callback(block_hash):
                         break
 
                 print(bcolors.WARNING + 'Token transfer found! Exchange: {0} | Action: {1} | Block: {2}'.format(exchange, action, b['number'])+ bcolors.ENDC)
-                n = requests.get('https://api.ethplorer.io/getTokenInfo/'+r['logs'][0]['address']+'?apiKey=freekey')
-                n = json.loads(n.text)
-                decimals = int(n['decimals'])
-                amount = r['logs'][0]['data']
-                amount = str(int(amount, 16)) # hex to dec
-                keepIndex = len(amount) - decimals # adjust for decimals defined in token SC
-                amount = amount[0:keepIndex]+'.'+amount[keepIndex:-1]
-                print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + amount + bcolors.ENDC)
+                try:
+                    n = requests.get('https://api.ethplorer.io/getTokenInfo/'+r['logs'][0]['address']+'?apiKey=freekey')
+                except Exception as e:
+                    print(bcolors.FAIL + 'Ethplorer ERROR: ' + str(e) + bcolors.ENDC)
+                    pass
 
-                # send data to Plotly
-                if n['symbol'] == 'OMG':
-                    # Current time on x-axis, random numbers on y-axis
-                    x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-                    y = amount
-                    queue = Queue()
-                    reader_p = Process(target=reader, args=((queue),))
-                    reader_p.daemon = True
-                    reader_p.start()    # Launch reader() as a separate python process
+                if n:
+                    n = json.loads(n.text)
+                    decimals = int(n['decimals'])
+                    amount = r['logs'][0]['data']
+                    amount = str(int(amount, 16)) # hex to dec
+                    keepIndex = len(amount) - decimals # adjust for decimals defined in token SC
+                    amount = amount[0:keepIndex]+'.'+amount[keepIndex:-1]
+                    print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + amount + bcolors.ENDC)
 
-                    writer([x, y, n['symbol'], amount], queue)
-                    # reader_p.join() # Wait for the reader to finish
+                    # send data to Plotly
+                    if n['symbol'] in tlist:
+                        # Current time on x-axis, random numbers on y-axis
+                        x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                        y = amount
+                        queue = Queue()
+                        reader_p = Process(target=reader, args=((queue),))
+                        reader_p.daemon = True
+                        reader_p.start()    # Launch reader() as a separate python process
+
+                        writer([x, y, n['symbol'], amount, action], queue)
+                        # reader_p.join() # Wait for the reader to finish
 
             else:
                 continue
