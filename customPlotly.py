@@ -26,17 +26,17 @@ class bcolors:
 def organize_traces(tlist):
     traceArray = []
     for symbol in tlist:
-        transferTrace = go.Scatter(
+        toTrace = go.Scatter(
             x=[],
             y=[],
-            name = symbol + 'to',
+            name = symbol + '_to',
             mode='lines+markers+text',
             yaxis = 'transfer amount'
         )
-        transferTrace = go.Scatter(
+        fromTrace = go.Scatter(
             x=[],
             y=[],
-            name = symbol + 'from',
+            name = symbol + '_from',
             mode='lines+markers+text',
             yaxis = 'transfer amount'
         )
@@ -47,7 +47,8 @@ def organize_traces(tlist):
             mode='lines+markers+text',
             yaxis = 'price'
         )
-        traceArray.append(transferTrace)
+        traceArray.append(toTrace)
+        traceArray.append(fromTrace)
         traceArray.append(currTrace)
 
     return traceArray
@@ -59,7 +60,7 @@ def set_points(x, y, symbol, amount, action):
             transferTrace = go.Scatter(
                 x=[x],
                 y=[y],
-                name = symbol + action,
+                name = symbol + '_' + action,
                 mode='lines+markers+text',
                 yaxis = 'transfer amount'
             )
@@ -85,7 +86,7 @@ def set_points(x, y, symbol, amount, action):
             transferTrace = go.Scatter(
                 x=[],
                 y=[],
-                name = symbol + action,
+                name = symbol + '_' + action,
                 mode='lines+markers+text',
                 yaxis = 'transfer amount'
             )
@@ -93,7 +94,7 @@ def set_points(x, y, symbol, amount, action):
 
     # Update Plotly
     fig = go.Figure(data=traceArray)
-    py.plot(fig, fileopt='extend', filename=Config['Setup']['PlotName'], auto_open=False)
+    py.plot(fig, fileopt='extend', filename=Config['Setup']['PlotName'] + '_' + symbol, auto_open=False)
     print(bcolors.FAIL + 'Sent to plotly ({0}, {1})'.format(symbol, amount) + bcolors.ENDC + ' [' + str(datetime.now()) + ']')
 
 Config = configparser.ConfigParser()
@@ -110,4 +111,5 @@ if len(sys.argv) > 1 and sys.argv[1] == 'setup':
 
     layout = go.Layout(title=Config['Setup']['PlotTitle'])
     fig = go.Figure(data=data, layout=layout)
-    py.plot(fig, fileopt='extend', filename=Config['Setup']['PlotName'])
+    for token in tlist:
+        py.plot(fig, fileopt='extend', filename=Config['Setup']['PlotName'] + '_' + token)
