@@ -74,6 +74,7 @@ def new_block_callback(block_hash):
                         break
 
                 print(bcolors.WARNING + 'Token transfer found! Exchange: {0} | Action: {1} | Block: {2}'.format(exchange, action, b['number'])+ bcolors.ENDC)
+                n = False
                 try:
                     n = requests.get('https://api.ethplorer.io/getTokenInfo/'+r['logs'][0]['address']+'?apiKey=freekey')
                 except Exception as e:
