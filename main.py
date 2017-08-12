@@ -85,9 +85,8 @@ def new_block_callback(block_hash):
                     n = json.loads(n.text)
                     decimals = int(n['decimals'])
                     amount = r['logs'][0]['data']
-                    amount = str(int(amount, 16)) # hex to dec
-                    keepIndex = len(amount) - decimals # adjust for decimals defined in token SC
-                    amount = amount[0:keepIndex]+'.'+amount[keepIndex:-1]
+                    amount = int(amount, 16) # hex to dec
+                    amount = amount / (10**decimals)
                     print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + amount + bcolors.ENDC)
 
                     # send data to Plotly
