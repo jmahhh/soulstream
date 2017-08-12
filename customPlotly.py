@@ -47,6 +47,7 @@ def organize_traces(tlist):
             mode='lines+markers+text',
             yaxis = 'price'
         )
+        # This order is important, see comment re trace identification in set_points
         traceArray.append(toTrace)
         traceArray.append(fromTrace)
         traceArray.append(currTrace)
@@ -64,7 +65,20 @@ def set_points(x, y, symbol, amount, action):
                 mode='lines+markers+text',
                 yaxis = 'transfer amount'
             )
-            traceArray.append(transferTrace)
+            placeholderTrace = go.Scatter(
+                x=[],
+                y=[],
+                name = symbol + '_' + action,
+                mode='lines+markers+text',
+                yaxis = 'transfer amount'
+            )
+            # apparently - unfortunately - plotly does not recognise traces by their name but order in the traceArray...
+            if action == 'to':
+                traceArray.append(transferTrace)
+                traceArray.append(placeholderTrace)
+            elif action == 'from':
+                traceArray.append(placeholderTrace)
+                traceArray.append(transferTrace)
             try:
                 n = requests.get('https://api.coinmarketcap.com/v1/ticker/' + idList[0] + '/')
             except Exception as e:
