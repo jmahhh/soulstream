@@ -87,7 +87,7 @@ def new_block_callback(block_hash):
                     amount = r['logs'][0]['data']
                     amount = int(amount, 16) # hex to dec
                     amount = amount / (10**decimals)
-                    print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + amount + bcolors.ENDC)
+                    print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + str(amount) + bcolors.ENDC)
 
                     # send data to Plotly
                     if n['symbol'] in tlist:
