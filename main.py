@@ -81,7 +81,7 @@ def new_block_callback(block_hash):
                     print(bcolors.FAIL + 'Ethplorer ERROR: ' + str(e) + bcolors.ENDC)
                     pass
 
-                if n:
+                if n and n['decimals']:
                     n = json.loads(n.text)
                     decimals = int(n['decimals'])
                     amount = r['logs'][0]['data']
