@@ -100,7 +100,8 @@ def new_block_callback(block_hash):
                     except Exception as e:
                         print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
                         pass
-                print('Empty ethplorer response.')
+                else:
+                    print('Empty ethplorer response.')
             else:
                 pass
                 # print('No etherdelta', r['from'], r['to'])
