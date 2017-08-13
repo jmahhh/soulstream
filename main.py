@@ -83,7 +83,8 @@ def new_block_callback(block_hash):
 
                 if n:
                     n = json.loads(n.text)
-                    if n['decimals']:
+                    # decimals may be undefined
+                    try: 
                         decimals = int(n['decimals'])
                         amount = r['logs'][0]['data']
                         amount = int(amount, 16) # hex to dec
@@ -102,7 +103,9 @@ def new_block_callback(block_hash):
 
                             writer([x, y, n['symbol'], amount, action], queue)
                             # reader_p.join() # Wait for the reader to finish
-
+                    except Exception as e:
+                        print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
+                        pass
             else:
                 continue
                 # print('No etherdelta', r['from'], r['to'])
