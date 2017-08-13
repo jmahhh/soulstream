@@ -72,7 +72,6 @@ def new_block_callback(block_hash):
                 except Exception as e:
                     print(bcolors.FAIL + 'Ethplorer ERROR: ' + str(e) + bcolors.ENDC)
                     pass
-                print('n {0}'.format(n))
                 if n:
                     n = json.loads(n.text)
                     # decimals may be undefined
