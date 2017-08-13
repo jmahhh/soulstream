@@ -22,14 +22,6 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-Config = configparser.ConfigParser()
-Config.read("config.ini")
-
-web3 = Web3(HTTPProvider(Config['Setup']['NodeURL']))
-
-tlist = Config.get('Tokens','List')
-tlist = ast.literal_eval(tlist)
-
 # close plotly stream when SIGINT received
 def signal_handler(signal, frame):
     # s.close()
@@ -109,13 +101,22 @@ def new_block_callback(block_hash):
         else:
             print('no r? {0}'.format(r))
 
-try:
-    block_filter = web3.eth.filter('latest')
-    print('Waiting for blocks...')
-    block_filter.watch(new_block_callback)
-except Exception as e:
-    print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
-    pass
+if __name__ == '__main__':
+
+    Config = configparser.ConfigParser()
+    Config.read("config.ini")
+
+    web3 = Web3(HTTPProvider(Config['Setup']['NodeURL']))
+
+    tlist = Config.get('Tokens','List')
+    tlist = ast.literal_eval(tlist)
+    try:
+        block_filter = web3.eth.filter('latest')
+        print('Waiting for blocks...')
+        block_filter.watch(new_block_callback)
+    except Exception as e:
+        print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
+        pass
 
 while True:
     pass
