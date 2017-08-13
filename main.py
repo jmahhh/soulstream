@@ -72,11 +72,11 @@ def new_block_callback(block_hash):
                 except Exception as e:
                     print(bcolors.FAIL + 'Ethplorer ERROR: ' + str(e) + bcolors.ENDC)
                     pass
-
+                print('n {0}'.format(n))
                 if n:
                     n = json.loads(n.text)
                     # decimals may be undefined
-                    try: 
+                    try:
                         decimals = int(n['decimals'])
                         amount = r['logs'][0]['data']
                         amount = int(amount, 16) # hex to dec
@@ -95,14 +95,17 @@ def new_block_callback(block_hash):
 
                             writer([x, y, n['symbol'], amount, action], queue)
                             # reader_p.join() # Wait for the reader to finish
+                        else:
+                            pass
                     except Exception as e:
                         print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
                         pass
+                print('Empty ethplorer response.')
             else:
-                continue
+                pass
                 # print('No etherdelta', r['from'], r['to'])
         else:
-            print('no r? {0}'.format(r))
+            print('Empty web3 response.')
 
 if __name__ == '__main__':
 
