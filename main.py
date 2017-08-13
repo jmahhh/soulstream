@@ -81,26 +81,27 @@ def new_block_callback(block_hash):
                     print(bcolors.FAIL + 'Ethplorer ERROR: ' + str(e) + bcolors.ENDC)
                     pass
 
-                if n and n['decimals']:
+                if n:
                     n = json.loads(n.text)
-                    decimals = int(n['decimals'])
-                    amount = r['logs'][0]['data']
-                    amount = int(amount, 16) # hex to dec
-                    amount = amount / (10**decimals)
-                    print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + str(amount) + bcolors.ENDC)
+                    if n['decimals']:
+                        decimals = int(n['decimals'])
+                        amount = r['logs'][0]['data']
+                        amount = int(amount, 16) # hex to dec
+                        amount = amount / (10**decimals)
+                        print(bcolors.OKBLUE + 'Token: ' + bcolors.ENDC + '{0} ({1})\n Amount: '.format(n['name'], n['symbol']) + bcolors.BOLD + str(amount) + bcolors.ENDC)
 
-                    # send data to Plotly
-                    if n['symbol'] in tlist:
-                        # Current time on x-axis, random numbers on y-axis
-                        x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-                        y = amount
-                        queue = Queue()
-                        reader_p = Process(target=reader, args=((queue),))
-                        reader_p.daemon = True
-                        reader_p.start()    # Launch reader() as a separate python process
+                        # send data to Plotly
+                        if n['symbol'] in tlist:
+                            # Current time on x-axis, random numbers on y-axis
+                            x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                            y = amount
+                            queue = Queue()
+                            reader_p = Process(target=reader, args=((queue),))
+                            reader_p.daemon = True
+                            reader_p.start()    # Launch reader() as a separate python process
 
-                        writer([x, y, n['symbol'], amount, action], queue)
-                        # reader_p.join() # Wait for the reader to finish
+                            writer([x, y, n['symbol'], amount, action], queue)
+                            # reader_p.join() # Wait for the reader to finish
 
             else:
                 continue
