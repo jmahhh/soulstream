@@ -4,6 +4,7 @@ import configparser
 import sys
 import signal
 import ast
+import time
 
 # should probably replace with threading
 from multiprocessing import Process, Queue
@@ -42,7 +43,7 @@ def reader(queue):
 def writer(array, queue):
     ## Write to the queue
     queue.put(array)   # Write 'count' numbers into the queue
-    queue.put('DONE')
+    # queue.put('DONE')
 
 def new_block_callback(block_hash):
     b = web3.eth.getBlock(block_hash)
@@ -87,10 +88,6 @@ def new_block_callback(block_hash):
                             # Current time on x-axis, random numbers on y-axis
                             x = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
                             y = amount
-                            queue = Queue()
-                            reader_p = Process(target=reader, args=((queue),))
-                            reader_p.daemon = True
-                            reader_p.start()    # Launch reader() as a separate python process
 
                             writer([x, y, n['symbol'], amount, action], queue)
                             # reader_p.join() # Wait for the reader to finish
@@ -101,11 +98,15 @@ def new_block_callback(block_hash):
                         pass
                 else:
                     print('Empty ethplorer response.')
+                    pass
             else:
                 pass
                 # print('No etherdelta', r['from'], r['to'])
         else:
             print('Empty web3 response.')
+            pass
+
+    lastUpdate = time.time()
 
 if __name__ == '__main__':
 
@@ -116,7 +117,14 @@ if __name__ == '__main__':
 
     tlist = Config.get('Tokens','List')
     tlist = ast.literal_eval(tlist)
+
+    lastUpdate = time.time()
+
     try:
+        queue = Queue()
+        reader_p = Process(target=reader, args=((queue),))
+        reader_p.daemon = True
+        reader_p.start()    # Launch reader() as a separate python process
         block_filter = web3.eth.filter('latest')
         print('Waiting for blocks...')
         block_filter.watch(new_block_callback)
@@ -124,5 +132,9 @@ if __name__ == '__main__':
         print(bcolors.FAIL + 'ERROR: ' + str(e) + bcolors.ENDC)
         pass
 
-while True:
-    pass
+    while True:
+        if lastUpdate and time.time() - lastUpdate > 60:
+            writer([[], [], 'VERI', 0, 'to'], queue)
+            lastUpdate = time.time()
+            print('empty plotly data written')
+        pass
