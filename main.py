@@ -136,5 +136,4 @@ if __name__ == '__main__':
         if lastUpdate and time.time() - lastUpdate > 60:
             writer([[], [], 'VERI', 0, 'to'], queue)
             lastUpdate = time.time()
-            print('empty plotly data written')
         pass
