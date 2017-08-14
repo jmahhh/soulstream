@@ -79,6 +79,9 @@ def set_points(x, y, symbol, amount, action):
             elif action == 'from':
                 traceArray.append(placeholderTrace)
                 traceArray.append(transferTrace)
+            elif action == 'emptyWrite':
+                traceArray.append(placeholderTrace)
+                traceArray.append(placeholderTrace)
             try:
                 n = requests.get('https://api.coinmarketcap.com/v1/ticker/' + idList[0] + '/')
             except Exception as e:
