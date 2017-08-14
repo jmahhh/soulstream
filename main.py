@@ -134,6 +134,6 @@ if __name__ == '__main__':
 
     while True:
         if lastUpdate and time.time() - lastUpdate > 60:
-            writer(None, None, 'VERI', 0, 'to'], queue)
+            writer([None, None, 'VERI', 0, 'to'], queue)
             lastUpdate = time.time()
         pass
